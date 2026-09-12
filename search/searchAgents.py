@@ -295,15 +295,14 @@ class CornersProblem(search.SearchProblem):
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (self.startingPosition, (False, False, False, False))
 
     def isGoalState(self, state: Any):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        position, cornersVisited = state
+        return all(cornersVisited)
 
     def getSuccessors(self, state: Any):
         """
@@ -317,15 +316,22 @@ class CornersProblem(search.SearchProblem):
         """
 
         successors = []
+        position, cornersVisited = state
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
-            #   x,y = currentPosition
-            #   dx, dy = Actions.directionToVector(action)
-            #   nextx, nexty = int(x + dx), int(y + dy)
-            #   hitsWall = self.walls[nextx][nexty]
+            x, y = position
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
 
-            "*** YOUR CODE HERE ***"
+            if not hitsWall:
+                nextPosition = (nextx, nexty)
+                newCornersVisited = list(cornersVisited)
+                if nextPosition in self.corners:
+                    cornerIndex = self.corners.index(nextPosition)
+                    newCornersVisited[cornerIndex] = True
+                successors.append(((nextPosition, tuple(newCornersVisited)), action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -361,8 +367,11 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    position, cornersVisited = state
+    unvisited = [corner for i, corner in enumerate(corners) if not cornersVisited[i]]
+    if not unvisited:
+        return 0
+    return max(util.manhattanDistance(position, corner) for corner in unvisited)
 
 
 
@@ -452,8 +461,10 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    foodList = foodGrid.asList()
+    if not foodList:
+        return 0
+    return max(mazeDistance(position, food, problem.startingGameState) for food in foodList)
 
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
