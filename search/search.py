@@ -89,18 +89,74 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    frontier = util.Stack()
+    frontier.push((problem.getStartState(), []))
+    visited = set()
+
+    while not frontier.isEmpty():
+        state, path = frontier.pop()
+
+        if state in visited:
+            continue
+        visited.add(state)
+
+        if problem.isGoalState(state):
+            return path
+
+        for successor, action, stepCost in problem.getSuccessors(state):
+            if successor not in visited:
+                frontier.push((successor, path + [action]))
+
+    return []
+
 
 def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+
+    frontier = util.Queue()
+    frontier.push((problem.getStartState(), []))
+    visited = set()
+
+    while not frontier.isEmpty():
+        state, path = frontier.pop()
+
+        if state in visited:
+            continue
+        visited.add(state)
+
+        if problem.isGoalState(state):
+            return path
+
+        for successor, action, stepCost in problem.getSuccessors(state):
+            if successor not in visited:
+                frontier.push((successor, path + [action]))
+
+    return []
 
 def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.PriorityQueue()
+    frontier.push((problem.getStartState(), [], 0), 0)
+    visited = set()
+
+    while not frontier.isEmpty():
+        state, path, cost = frontier.pop()
+
+        if state in visited:
+            continue
+        visited.add(state)
+
+        if problem.isGoalState(state):
+            return path
+
+        for successor, action, stepCost in problem.getSuccessors(state):
+            if successor not in visited:
+                newCost = cost + stepCost
+                frontier.push((successor, path + [action], newCost), newCost)
+
+    return []
 
 def nullHeuristic(state, problem=None) -> float:
     """
