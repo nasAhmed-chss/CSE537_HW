@@ -90,20 +90,26 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
 
-    frontier = util.Stack()
+
+    # LIFO, this will explore the deepest nodes first
+    frontier = util.Stack() 
     frontier.push((problem.getStartState(), []))
     visited = set()
 
     while not frontier.isEmpty():
+        #pop the most recent state
         state, path = frontier.pop()
 
+        #skip states already expanded
         if state in visited:
             continue
         visited.add(state)
 
+        #stop if goal reached
         if problem.isGoalState(state):
             return path
 
+        #extend path 
         for successor, action, stepCost in problem.getSuccessors(state):
             if successor not in visited:
                 frontier.push((successor, path + [action]))
@@ -114,7 +120,8 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
 def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     """Search the shallowest nodes in the search tree first."""
 
-
+    # FIFO, this will explore the shallowest nodes first
+    #Logic same as DFS, but using a queue instead of a stack
     frontier = util.Queue()
     frontier.push((problem.getStartState(), []))
     visited = set()
@@ -137,11 +144,15 @@ def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
 
 def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
     """Search the node of least total cost first."""
+
+    #order by path cost not insertion order
     frontier = util.PriorityQueue()
     frontier.push((problem.getStartState(), [], 0), 0)
     visited = set()
 
     while not frontier.isEmpty():
+
+        #pop cheapest pending state
         state, path, cost = frontier.pop()
 
         if state in visited:
@@ -167,6 +178,8 @@ def nullHeuristic(state, problem=None) -> float:
 
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directions]:
     """Search the node that has the lowest combined cost and heuristic first."""
+
+    #order by path cost + heuristic estimate
     frontier = util.PriorityQueue()
     startState = problem.getStartState()
     frontier.push((startState, [], 0), heuristic(startState, problem))
@@ -178,13 +191,14 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directi
         if state in visited:
             continue
         visited.add(state)
-
+ 
         if problem.isGoalState(state):
             return path
 
         for successor, action, stepCost in problem.getSuccessors(state):
             if successor not in visited:
                 newCost = cost + stepCost
+                #f(n) = g(n) + h(n)
                 priority = newCost + heuristic(successor, problem)
                 frontier.push((successor, path + [action], newCost), priority)
 

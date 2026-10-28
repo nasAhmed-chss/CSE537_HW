@@ -295,6 +295,7 @@ class CornersProblem(search.SearchProblem):
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
+        #all four corners are unvisited at the start, so we can represent that with a tuple of four False values
         return (self.startingPosition, (False, False, False, False))
 
     def isGoalState(self, state: Any):
@@ -302,6 +303,7 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         position, cornersVisited = state
+        # goal is reached once every corner flag is True
         return all(cornersVisited)
 
     def getSuccessors(self, state: Any):
@@ -327,7 +329,10 @@ class CornersProblem(search.SearchProblem):
 
             if not hitsWall:
                 nextPosition = (nextx, nexty)
+                #this is copied so we dont modify the original 
                 newCornersVisited = list(cornersVisited)
+
+
                 if nextPosition in self.corners:
                     cornerIndex = self.corners.index(nextPosition)
                     newCornersVisited[cornerIndex] = True
@@ -368,11 +373,12 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     position, cornersVisited = state
+    #remaining goals 
     unvisited = [corner for i, corner in enumerate(corners) if not cornersVisited[i]]
     if not unvisited:
         return 0
     return max(util.manhattanDistance(position, corner) for corner in unvisited)
-
+    # distance to farthest unvisited corner is a good lower bound
 
 
 class AStarCornersAgent(SearchAgent):
@@ -465,7 +471,7 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     if not foodList:
         return 0
     return max(mazeDistance(position, food, problem.startingGameState) for food in foodList)
-
+    #actual maze distance to the furthest remaining food is a good lower bound
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
     """
